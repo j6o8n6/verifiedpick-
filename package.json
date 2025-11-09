@@ -1,0 +1,44 @@
+{
+  "name": "verifiedpicks",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "prisma generate && next build",
+    "start": "next start",
+    "lint": "next lint",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:push": "prisma db push"
+  },
+  "dependencies": {
+    "@headlessui/react": "^1.7.17",
+    "@prisma/client": "^5.9.1",
+    "@tanstack/react-query": "^5.29.2",
+    "@total-typescript/ts-reset": "^0.5.1",
+    "@types/bcryptjs": "^2.4.2",
+    "@types/node": "^20.10.5",
+    "@types/react": "^18.2.46",
+    "@types/react-dom": "^18.2.18",
+    "autoprefixer": "^10.4.16",
+    "bcryptjs": "^2.4.3",
+    "clsx": "^2.0.0",
+    "next": "14.1.0",
+    "next-auth": "^4.24.6",
+    "postcss": "^8.4.31",
+    "prisma": "^5.9.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "stripe": "^14.21.0",
+    "swr": "^2.2.4",
+    "tailwind-merge": "^2.0.0",
+    "tailwindcss": "^3.3.6",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.202",
+    "eslint": "^8.56.0",
+    "eslint-config-next": "14.1.0",
+    "typescript": "^5.3.3"
+  }
+}
