@@ -1,0 +1,113 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = env("DATABASE_PROVIDER", "postgresql")
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String   @id @default(cuid())
+  name             String?
+  email            String   @unique
+  hashedPassword   String?
+  role             Role     @default(BETTOR)
+  isVerified       Boolean  @default(false)
+  stripeCustomerId String?
+  stripeAccountId  String?
+  capper           Capper?
+  subscriptions    Subscription[]
+  picks            Pick[]    @relation("CapperPicks")
+  verification     VerificationRequest?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+enum Role {
+  BETTOR
+  CAPPER
+  ADMIN
+}
+
+model Capper {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+  bio       String?
+  sports    String[]
+  winRate   Float    @default(0)
+  roi       Float    @default(0)
+  record    String   @default("0-0")
+  plans     Plan[]
+  picks     Pick[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Plan {
+  id            String   @id @default(cuid())
+  capperId      String
+  capper        Capper   @relation(fields: [capperId], references: [id])
+  name          String
+  price         Int
+  interval      PlanInterval
+  stripePriceId String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+enum PlanInterval {
+  day
+  week
+  month
+}
+
+model Pick {
+  id         String   @id @default(cuid())
+  capperId   String
+  capper     Capper   @relation(fields: [capperId], references: [id])
+  event      String
+  line       String
+  sport      String
+  confidence String
+  analysis   String
+  createdAt  DateTime @default(now())
+}
+
+model Subscription {
+  id          String   @id @default(cuid())
+  userId      String
+  capperId    String
+  planId      String?
+  user        User     @relation(fields: [userId], references: [id])
+  capper      Capper   @relation(fields: [capperId], references: [id])
+  plan        Plan?    @relation(fields: [planId], references: [id])
+  stripeSubId String   @unique
+  active      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model VerificationRequest {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+  message   String?
+  status    VerificationStatus @default(PENDING)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum VerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model PlatformSettings {
+  id                Int     @id @default(1)
+  verifiedFeeBps    Int     @default(1500)
+  unverifiedFeeBps  Int     @default(2500)
+  updatedAt         DateTime @updatedAt
+}
