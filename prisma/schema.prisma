@@ -16,10 +16,16 @@ model User {
   isVerified       Boolean  @default(false)
   stripeCustomerId String?
   stripeAccountId  String?
+
+  // 1:1 optional link if this user is a capper
   capper           Capper?
+
+  // a bettor can have multiple subscriptions
   subscriptions    Subscription[]
-  picks            Pick[]    @relation("CapperPicks")
+
+  // request to become verified
   verification     VerificationRequest?
+
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 }
@@ -34,13 +40,22 @@ model Capper {
   id        String   @id @default(cuid())
   userId    String   @unique
   user      User     @relation(fields: [userId], references: [id])
+
   bio       String?
   sports    String[]
   winRate   Float    @default(0)
   roi       Float    @default(0)
   record    String   @default("0-0")
+
+  // plans this capper sells
   plans     Plan[]
+
+  // picks this capper posts
   picks     Pick[]
+
+  // subscriptions to this capper (missing side fixed)
+  subscriptions Subscription[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -49,10 +64,15 @@ model Plan {
   id            String   @id @default(cuid())
   capperId      String
   capper        Capper   @relation(fields: [capperId], references: [id])
+
   name          String
   price         Int
   interval      PlanInterval
   stripePriceId String?
+
+  // subscriptions on this plan (missing side fixed)
+  subscriptions Subscription[]
+
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }
@@ -65,8 +85,11 @@ enum PlanInterval {
 
 model Pick {
   id         String   @id @default(cuid())
+
+  // a pick belongs to a capper
   capperId   String
   capper     Capper   @relation(fields: [capperId], references: [id])
+
   event      String
   line       String
   sport      String
@@ -77,12 +100,16 @@ model Pick {
 
 model Subscription {
   id          String   @id @default(cuid())
+
   userId      String
   capperId    String
   planId      String?
+
+  // relations
   user        User     @relation(fields: [userId], references: [id])
   capper      Capper   @relation(fields: [capperId], references: [id])
   plan        Plan?    @relation(fields: [planId], references: [id])
+
   stripeSubId String   @unique
   active      Boolean  @default(false)
   createdAt   DateTime @default(now())
@@ -106,8 +133,8 @@ enum VerificationStatus {
 }
 
 model PlatformSettings {
-  id                Int     @id @default(1)
-  verifiedFeeBps    Int     @default(1500)
-  unverifiedFeeBps  Int     @default(2500)
-  updatedAt         DateTime @updatedAt
+  id               Int      @id @default(1)   // singleton row
+  verifiedFeeBps   Int      @default(1500)
+  unverifiedFeeBps Int      @default(2500)
+  updatedAt        DateTime @updatedAt
 }
